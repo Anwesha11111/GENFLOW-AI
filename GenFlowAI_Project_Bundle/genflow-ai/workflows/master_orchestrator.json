@@ -1,0 +1,77 @@
+{
+  "name": "GenFlowAI_Master_Orchestrator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "telemetry-stream",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook_Ingest",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "agent": "conversational",
+        "prompt": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "You are a Starlink Flight Systems Agent. Analyze satellite telemetry, determine if de-orbiting or repair is needed, and use tools to execute commands."
+        }
+      },
+      "id": "2",
+      "name": "Starlink_Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "3",
+      "name": "OpenAI_Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        300,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook_Ingest": {
+      "main": [
+        [
+          {
+            "node": "Starlink_Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI_Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Starlink_Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
